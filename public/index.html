@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#6366f1">
+<title>TaskManager — Gestão de Equipe</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;color:#0f172a;min-height:100vh}
+:root{
+  --p:#6366f1;--pd:#4f46e5;--g:#10b981;--r:#ef4444;--y:#f59e0b;--b:#0ea5e9;
+  --s0:#f8fafc;--s1:#f1f5f9;--s2:#e2e8f0;--s3:#cbd5e1;--s4:#94a3b8;
+  --t6:#475569;--t9:#0f172a;
+}
+
+/* ── HEADER ── */
+header{
+  background:linear-gradient(135deg,#6366f1,#7c3aed);
+  color:#fff;padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:64px;position:sticky;top:0;z-index:200;
+  box-shadow:0 2px 20px rgba(99,102,241,.4);
+}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
+.logo span{font-size:24px}
+.header-actions{display:flex;align-items:center;gap:10px}
+.notif-btn{
+  background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.3);
+  border-radius:10px;padding:8px 16px;font-weight:700;font-size:13px;cursor:pointer;
+  transition:.2s;display:flex;align-items:center;gap:6px;
+}
+.notif-btn:hover{background:rgba(255,255,255,.3)}
+.notif-btn.active{background:#10b981;border-color:#10b981}
+.devices-badge{background:rgba(255,255,255,.15);border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600}
+
+/* ── TOASTS ── */
+#toasts{position:fixed;top:76px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:10px;max-width:340px}
+.toast{
+  background:#fff;border-radius:14px;padding:14px 18px;
+  box-shadow:0 8px 32px rgba(0,0,0,.15);
+  border-left:4px solid var(--p);
+  animation:slideIn .35s cubic-bezier(.34,1.56,.64,1);
+}
+.toast.success{border-color:var(--g)}
+.toast.warning{border-color:var(--y)}
+.toast-title{font-weight:800;font-size:14px;margin-bottom:3px}
+.toast-body{font-size:13px;color:var(--t6)}
+@keyframes slideIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes slideOut{from{transform:translateX(0);opacity:1}to{transform:translateX(110%);opacity:0}}
+
+/* ── LAYOUT ── */
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 64px)}
+@media(max-width:768px){.layout{grid-template-columns:1fr}}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  background:#fff;border-right:2px solid var(--s2);
+  padding:20px;display:flex;flex-direction:column;gap:16px;
+}
+.sidebar-title{font-size:11px;font-weight:800;color:var(--s4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--s1);border-radius:12px;padding:14px;text-align:center}
+.stat-val{font-size:24px;font-weight:900;color:var(--p)}
+.stat-val.green{color:var(--g)}
+.stat-label{font-size:11px;color:var(--s4);margin-top:2px;font-weight:600}
+
+/* Progress ring */
+.progress-wrap{text-align:center;padding:8px 0}
+.progress-ring{position:relative;display:inline-block}
+.progress-ring svg{transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--s2);stroke-width:8}
+.ring-fg{fill:none;stroke:var(--p);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .6s ease}
+.ring-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.ring-pct{font-size:22px;font-weight:900;color:var(--p)}
+.ring-sub{font-size:10px;color:var(--s4);font-weight:700}
+
+/* Notifications panel */
+.notif-panel{background:var(--s1);border-radius:12px;padding:12px;max-height:220px;overflow-y:auto}
+.notif-item{padding:8px 0;border-bottom:1px solid var(--s2);font-size:12px;color:var(--t6)}
+.notif-item:last-child{border-bottom:none}
+.notif-item strong{display:block;color:var(--t9);font-size:13px;margin-bottom:2px}
+.notif-time{color:var(--s4);font-size:11px}
+.empty-notif{text-align:center;color:var(--s4);padding:16px;font-size:13px}
+
+/* Add member */
+.add-member-form{display:flex;gap:8px}
+.add-member-form input{flex:1;border:2px solid var(--s2);border-radius:10px;padding:8px 12px;font-size:13px;outline:none;transition:.2s}
+.add-member-form input:focus{border-color:var(--p)}
+.btn-sm{background:var(--p);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;transition:.2s;white-space:nowrap}
+.btn-sm:hover{background:var(--pd)}
+.btn-sm.outline{background:transparent;color:var(--p);border:2px solid var(--p)}
+.btn-sm.outline:hover{background:var(--p);color:#fff}
+.btn-sm.green{background:var(--g)}
+.btn-sm.green:hover{background:#059669}
+.btn-sm.red{background:var(--r)}
+
+/* ── MAIN ── */
+main{padding:24px;display:flex;flex-direction:column;gap:24px}
+
+/* Add task bar */
+.add-task-bar{
+  background:#fff;border-radius:16px;padding:18px 22px;
+  border:2px solid var(--s2);display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+  box-shadow:0 2px 12px rgba(0,0,0,.04);
+}
+.add-task-bar input,.add-task-bar select{
+  border:2px solid var(--s2);border-radius:10px;padding:10px 14px;font-size:14px;
+  outline:none;transition:.2s;background:#fff;
+}
+.add-task-bar input{flex:1;min-width:160px}
+.add-task-bar input:focus,.add-task-bar select:focus{border-color:var(--p)}
+.btn-add{
+  background:linear-gradient(135deg,var(--p),var(--pd));
+  color:#fff;border:none;border-radius:10px;padding:10px 22px;
+  font-size:14px;font-weight:800;cursor:pointer;transition:.2s;
+  box-shadow:0 4px 12px rgba(99,102,241,.3);
+}
+.btn-add:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(99,102,241,.4)}
+
+/* Members grid */
+.members-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+
+/* Member card */
+.member-card{
+  background:#fff;border-radius:18px;padding:22px;
+  border:2px solid var(--s2);transition:.25s;
+  box-shadow:0 2px 12px rgba(0,0,0,.04);
+}
+.member-card.completed{border-color:var(--g);background:linear-gradient(135deg,#fff,#f0fdf4)}
+.member-card:hover{box-shadow:0 8px 28px rgba(0,0,0,.1);transform:translateY(-2px)}
+.member-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.avatar{
+  width:44px;height:44px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:15px;color:#fff;flex-shrink:0;
+}
+.member-info{flex:1}
+.member-name{font-weight:800;font-size:16px}
+.member-sub{font-size:12px;color:var(--s4);margin-top:1px}
+.member-pct{font-weight:900;font-size:18px}
+
+/* Mini progress bar */
+.mini-bar{background:var(--s2);border-radius:999px;height:6px;margin-bottom:16px;overflow:hidden}
+.mini-fill{height:100%;border-radius:999px;background:var(--p);transition:.5s ease}
+.mini-fill.done{background:var(--g)}
+
+/* Task list */
+.task-list{display:flex;flex-direction:column;gap:8px}
+.task-item{
+  display:flex;align-items:center;gap:10px;
+  background:var(--s1);border-radius:12px;padding:10px 12px;
+  border:1.5px solid var(--s2);transition:.2s;
+}
+.task-item:hover{border-color:var(--s3)}
+.task-item.done-item{background:#f0fdf4;border-color:#bbf7d0;opacity:.8}
+.task-check{
+  width:22px;height:22px;border-radius:7px;border:2px solid var(--s3);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:.2s;background:#fff;
+}
+.task-check.checked{background:var(--g);border-color:var(--g);color:#fff}
+.task-check:hover:not(.checked){border-color:var(--p);background:#eef2ff}
+.task-title{flex:1;font-size:13px;font-weight:600;color:var(--t9)}
+.task-title.striked{text-decoration:line-through;color:var(--s4)}
+.priority{
+  padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;
+  flex-shrink:0;
+}
+.p-alta {background:#fee2e2;color:#991b1b}
+.p-media{background:#fef9c3;color:#854d0e}
+.p-baixa{background:#dcfce7;color:#166534}
+.task-del{background:none;border:none;cursor:pointer;color:var(--s4);font-size:18px;padding:0 2px;line-height:1;transition:.2s;flex-shrink:0}
+.task-del:hover{color:var(--r)}
+
+/* Empty */
+.empty{text-align:center;color:var(--s4);font-size:13px;padding:20px 0}
+
+/* ── MODAL ── */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;
+  display:flex;align-items:center;justify-content:center;padding:16px;
+  animation:fadeOverlay .2s ease;
+}
+@keyframes fadeOverlay{from{opacity:0}to{opacity:1}}
+.modal{
+  background:#fff;border-radius:20px;padding:28px;max-width:440px;width:100%;
+  box-shadow:0 24px 64px rgba(0,0,0,.2);animation:popIn .3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.modal h2{font-size:20px;font-weight:900;margin-bottom:20px}
+.modal label{display:block;font-size:12px;font-weight:700;color:var(--s4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;margin-top:14px}
+.modal input,.modal select,.modal textarea{
+  width:100%;border:2px solid var(--s2);border-radius:10px;padding:10px 14px;
+  font-size:14px;outline:none;transition:.2s;font-family:inherit;
+}
+.modal input:focus,.modal select:focus{border-color:var(--p)}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+
+/* Responsive */
+@media(max-width:768px){
+  .sidebar{display:none}
+  main{padding:16px}
+  .add-task-bar{padding:14px}
+  .members-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo"><span>📋</span> TaskManager</div>
+  <div class="header-actions">
+    <span class="devices-badge" id="devBadge">0 dispositivos</span>
+    <button class="notif-btn" id="notifBtn" onclick="toggleNotifications()">
+      🔔 Ativar notificações
+    </button>
+  </div>
+</header>
+
+<!-- TOASTS -->
+<div id="toasts"></div>
+
+<!-- MODAL -->
+<div class="overlay" id="modal" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h2 id="modalTitle">Nova Tarefa</h2>
+    <label>Título</label>
+    <input id="mTitle" type="text" placeholder="Descrição da tarefa...">
+    <label>Responsável</label>
+    <select id="mMember"></select>
+    <label>Prioridade</label>
+    <select id="mPriority">
+      <option value="alta">🔴 Alta</option>
+      <option value="media" selected>🟡 Média</option>
+      <option value="baixa">🟢 Baixa</option>
+    </select>
+    <div class="modal-actions">
+      <button class="btn-sm outline" onclick="closeModal()">Cancelar</button>
+      <button class="btn-sm" onclick="submitModal()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div>
+      <div class="sidebar-title">Progresso geral</div>
+      <div class="progress-wrap">
+        <div class="progress-ring">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+            <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="52" stroke-dasharray="326.7" stroke-dashoffset="326.7"></circle>
+          </svg>
+          <div class="ring-label">
+            <div class="ring-pct" id="ringPct">0%</div>
+            <div class="ring-sub">concluído</div>
+          </div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat"><div class="stat-val" id="sTot">0</div><div class="stat-label">Total</div></div>
+        <div class="stat"><div class="stat-val green" id="sDone">0</div><div class="stat-label">Concluídas</div></div>
+        <div class="stat"><div class="stat-val" id="sMem">0</div><div class="stat-label">Membros</div></div>
+        <div class="stat"><div class="stat-val" id="sDev">0</div><div class="stat-label">Dispositivos</div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sidebar-title">Adicionar membro</div>
+      <div class="add-member-form">
+        <input id="newMemberName" type="text" placeholder="Nome do membro..." maxlength="30" onkeydown="if(event.key==='Enter')addMember()">
+        <button class="btn-sm" onclick="addMember()">+</button>
+      </div>
+    </div>
+
+    <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;gap:8px">
+      <div class="sidebar-title">Notificações recentes</div>
+      <div class="notif-panel" id="notifPanel">
+        <div class="empty-notif">Nenhuma notificação ainda</div>
+      </div>
+    </div>
+
+    <button class="btn-sm green" onclick="sendTest()" style="width:100%">📤 Testar notificação</button>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+    <!-- Add task bar -->
+    <div class="add-task-bar">
+      <input id="quickTitle" type="text" placeholder="Nova tarefa..." maxlength="80" onkeydown="if(event.key==='Enter')quickAdd()">
+      <select id="quickMember"></select>
+      <select id="quickPriority">
+        <option value="alta">🔴 Alta</option>
+        <option value="media" selected>🟡 Média</option>
+        <option value="baixa">🟢 Baixa</option>
+      </select>
+      <button class="btn-add" onclick="quickAdd()">+ Adicionar Tarefa</button>
+    </div>
+
+    <!-- Members grid -->
+    <div class="members-grid" id="membersGrid">
+      <div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:40px">Carregando...</div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────
+const API = window.location.hostname === 'localhost'
+  ? 'http://localhost:3001'
+  : window.location.origin;
+const WS_URL = API.replace(/^http/, 'ws');
+
+// ── STATE ───────────────────────────────────────────────────
+let state = { members: [], stats: {}, notifications: [] };
+let pushSub = null;
+let ws = null;
+
+// ── WEBSOCKET ───────────────────────────────────────────────
+function connectWS() {
+  ws = new WebSocket(`${WS_URL}`);
+  ws.onmessage = e => {
+    const { event, data } = JSON.parse(e.data);
+    if (event === 'init' || event === 'state') {
+      state = data;
+      render();
+    }
+    if (event === 'notification') {
+      showToast(data.title, data.body, 'success');
+      renderNotifPanel();
+    }
+  };
+  ws.onclose = () => setTimeout(connectWS, 3000);
+  ws.onerror = () => {};
+}
+
+// ── FETCH HELPERS ───────────────────────────────────────────
+async function api(path, opts = {}) {
+  const r = await fetch(`${API}${path}`, {
+    headers: { 'Content-Type': 'application/json' },
+    ...opts,
+  });
+  return r.json();
+}
+
+// ── NOTIFICATIONS ────────────────────────────────────────────
+async function toggleNotifications() {
+  if (pushSub) {
+    await api('/api/push/unsubscribe', { method: 'POST', body: JSON.stringify({ endpoint: pushSub.endpoint }) });
+    pushSub = null;
+    document.getElementById('notifBtn').textContent = '🔔 Ativar notificações';
+    document.getElementById('notifBtn').classList.remove('active');
+    showToast('Notificações desativadas', '', 'warning');
+    return;
+  }
+  await enablePush();
+}
+
+async function enablePush() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    showToast('⚠️ Notificações push não suportadas neste browser', '', 'warning');
+    return;
+  }
+  const perm = await Notification.requestPermission();
+  if (perm !== 'granted') {
+    showToast('Permissão negada. Clique no cadeado na barra do browser para permitir.', '', 'warning');
+    return;
+  }
+  try {
+    const reg      = await navigator.serviceWorker.ready;
+    const { key }  = await api('/api/vapid-public-key');
+    const sub      = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(key),
+    });
+    pushSub = sub.toJSON();
+    const { devices } = await api('/api/push/subscribe', { method: 'POST', body: JSON.stringify(pushSub) });
+    document.getElementById('notifBtn').innerHTML = '✅ Notificações ativas';
+    document.getElementById('notifBtn').classList.add('active');
+    document.getElementById('devBadge').textContent = `${devices} dispositivo(s)`;
+    showToast('✅ Notificações ativadas!', 'Você receberá alertas mesmo com o site fechado.', 'success');
+  } catch(err) {
+    showToast('Erro ao ativar: ' + err.message, '', 'warning');
+  }
+}
+
+async function sendTest() {
+  try {
+    const { devices } = await api('/api/notify/test', { method: 'POST' });
+    showToast('📤 Notificação de teste enviada', `Para ${devices} dispositivo(s)`, 'success');
+  } catch(e) {
+    showToast('Erro ao enviar notificação', '', 'warning');
+  }
+}
+
+// ── MEMBERS ──────────────────────────────────────────────────
+async function addMember() {
+  const input = document.getElementById('newMemberName');
+  const name  = input.value.trim();
+  if (!name) return;
+  await api('/api/members', { method: 'POST', body: JSON.stringify({ name }) });
+  input.value = '';
+}
+
+// ── TASKS ────────────────────────────────────────────────────
+async function quickAdd() {
+  const title      = document.getElementById('quickTitle').value.trim();
+  const assignedTo = document.getElementById('quickMember').value;
+  const priority   = document.getElementById('quickPriority').value;
+  if (!title || !assignedTo) { showToast('Preencha o título e o responsável', '', 'warning'); return; }
+  await api('/api/tasks', { method: 'POST', body: JSON.stringify({ title, assignedTo, priority }) });
+  document.getElementById('quickTitle').value = '';
+}
+
+async function toggleTask(id, current) {
+  await api(`/api/tasks/${id}`, { method: 'PATCH', body: JSON.stringify({ done: !current }) });
+}
+
+async function deleteTask(id) {
+  await api(`/api/tasks/${id}`, { method: 'DELETE' });
+}
+
+// ── RENDER ───────────────────────────────────────────────────
+function render() {
+  renderStats();
+  renderMembersGrid();
+  renderMemberSelects();
+  renderNotifPanel();
+}
+
+function renderStats() {
+  const s = state.stats || {};
+  const pct = s.total > 0 ? Math.round((s.done / s.total) * 100) : 0;
+  document.getElementById('sTot').textContent  = s.total  || 0;
+  document.getElementById('sDone').textContent = s.done   || 0;
+  document.getElementById('sMem').textContent  = s.members|| 0;
+  document.getElementById('sDev').textContent  = s.devices|| 0;
+  document.getElementById('devBadge').textContent = `${s.devices || 0} dispositivo(s)`;
+  const circ  = 326.7;
+  const offset= circ - (circ * pct / 100);
+  document.getElementById('ringFg').style.strokeDashoffset  = offset;
+  document.getElementById('ringFg').style.stroke = pct === 100 ? '#10b981' : '#6366f1';
+  document.getElementById('ringPct').textContent = pct + '%';
+  document.getElementById('ringPct').style.color = pct === 100 ? '#10b981' : '#6366f1';
+}
+
+function renderMembersGrid() {
+  const grid = document.getElementById('membersGrid');
+  if (!state.members?.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:40px">Nenhum membro. Adicione um membro na barra lateral.</div>'; return; }
+
+  grid.innerHTML = state.members.map(m => {
+    const tot  = m.tasks.length;
+    const done = m.tasks.filter(t => t.done).length;
+    const pct  = tot > 0 ? Math.round((done / tot) * 100) : 0;
+    return `
+    <div class="member-card ${m.completedAll && tot > 0 ? 'completed' : ''}">
+      <div class="member-header">
+        <div class="avatar" style="background:${m.color}">${m.avatar}</div>
+        <div class="member-info">
+          <div class="member-name">${m.completedAll && tot > 0 ? '🏆 ' : ''}${esc(m.name)}</div>
+          <div class="member-sub">${done}/${tot} tarefas concluídas</div>
+        </div>
+        <div class="member-pct" style="color:${pct===100?'#10b981':'#6366f1'}">${pct}%</div>
+      </div>
+      <div class="mini-bar"><div class="mini-fill ${pct===100?'done':''}" style="width:${pct}%"></div></div>
+      <div class="task-list">
+        ${tot === 0
+          ? '<div class="empty">Sem tarefas atribuídas</div>'
+          : m.tasks.map(t => `
+            <div class="task-item ${t.done?'done-item':''}">
+              <div class="task-check ${t.done?'checked':''}" onclick="toggleTask('${t.id}',${t.done})">
+                ${t.done?'✓':''}
+              </div>
+              <span class="task-title ${t.done?'striked':''}">${esc(t.title)}</span>
+              <span class="priority p-${t.priority}">${t.priority}</span>
+              <button class="task-del" onclick="deleteTask('${t.id}')" title="Remover">×</button>
+            </div>`).join('')
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderMemberSelects() {
+  const opts = state.members?.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('') || '';
+  ['quickMember','mMember'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { const v = el.value; el.innerHTML = opts; if (v) el.value = v; }
+  });
+}
+
+function renderNotifPanel() {
+  const panel = document.getElementById('notifPanel');
+  const notes = state.notifications || [];
+  if (!notes.length) { panel.innerHTML = '<div class="empty-notif">Nenhuma notificação ainda</div>'; return; }
+  panel.innerHTML = notes.map(n => `
+    <div class="notif-item">
+      <strong>${esc(n.title)}</strong>
+      ${n.body ? `<span>${esc(n.body)}</span>` : ''}
+      <span class="notif-time">${timeAgo(n.at)}</span>
+    </div>`).join('');
+}
+
+// ── MODAL ────────────────────────────────────────────────────
+function openModal() {
+  document.getElementById('modal').style.display = 'flex';
+  document.getElementById('mTitle').focus();
+}
+function closeModal() {
+  document.getElementById('modal').style.display = 'none';
+  document.getElementById('mTitle').value = '';
+}
+async function submitModal() {
+  const title      = document.getElementById('mTitle').value.trim();
+  const assignedTo = document.getElementById('mMember').value;
+  const priority   = document.getElementById('mPriority').value;
+  if (!title) return;
+  await api('/api/tasks', { method: 'POST', body: JSON.stringify({ title, assignedTo, priority }) });
+  closeModal();
+}
+
+// ── TOAST ────────────────────────────────────────────────────
+function showToast(title, body, type = 'info') {
+  const container = document.getElementById('toasts');
+  const div = document.createElement('div');
+  div.className = `toast ${type}`;
+  div.innerHTML = `<div class="toast-title">${esc(title)}</div>${body ? `<div class="toast-body">${esc(body)}</div>` : ''}`;
+  container.prepend(div);
+  setTimeout(() => { div.style.animation = 'slideOut .3s ease forwards'; setTimeout(() => div.remove(), 300); }, 5000);
+}
+
+// ── UTILS ────────────────────────────────────────────────────
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+function timeAgo(ts) {
+  const d = Date.now() - ts;
+  if (d < 60000) return 'agora';
+  if (d < 3600000) return `${Math.floor(d/60000)}min atrás`;
+  if (d < 86400000) return `${Math.floor(d/3600000)}h atrás`;
+  return `${Math.floor(d/86400000)}d atrás`;
+}
+function urlBase64ToUint8Array(b64) {
+  const pad = b64 + '='.repeat((4 - b64.length % 4) % 4);
+  const raw = atob(pad.replace(/-/g,'+').replace(/_/g,'/'));
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+(async () => {
+  connectWS();
+  try {
+    state = await api('/api/state');
+    render();
+  } catch {
+    showToast('Conectando ao servidor...', '', 'warning');
+    setTimeout(() => connectWS(), 1000);
+  }
+})();
+</script>
+</body>
+</html>
