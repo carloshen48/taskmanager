@@ -321,7 +321,7 @@ main{padding:24px;display:flex;flex-direction:column;gap:24px}
 const API = window.location.hostname === 'localhost'
   ? 'http://localhost:3001'
   : window.location.origin;
-const WS_URL = API.replace(/^http/, 'ws');
+const WS_URL = API.replace(/^http/, 'ws') + '/ws';
 
 // ── STATE ───────────────────────────────────────────────────
 let state = { members: [], stats: {}, notifications: [] };
