@@ -4,266 +4,247 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#6366f1">
-<title>TaskManager — Gestão de Equipe</title>
+<title>Carlos te obriga a fazer</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;color:#0f172a;min-height:100vh}
 :root{
-  --p:#6366f1;--pd:#4f46e5;--g:#10b981;--r:#ef4444;--y:#f59e0b;--b:#0ea5e9;
-  --s0:#f8fafc;--s1:#f1f5f9;--s2:#e2e8f0;--s3:#cbd5e1;--s4:#94a3b8;
+  --p:#6366f1;--pd:#4f46e5;--g:#10b981;--r:#ef4444;--y:#f59e0b;
+  --s1:#f1f5f9;--s2:#e2e8f0;--s3:#cbd5e1;--s4:#94a3b8;
   --t6:#475569;--t9:#0f172a;
 }
 
 /* ── HEADER ── */
 header{
   background:linear-gradient(135deg,#6366f1,#7c3aed);
-  color:#fff;padding:0 24px;
+  color:#fff;padding:0 20px;
   display:flex;align-items:center;justify-content:space-between;
   height:64px;position:sticky;top:0;z-index:200;
   box-shadow:0 2px 20px rgba(99,102,241,.4);
+  gap:10px;
 }
-.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
-.logo span{font-size:24px}
-.header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.notif-btn{
-  background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.3);
-  border-radius:10px;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;
-  transition:.2s;display:flex;align-items:center;gap:6px;
-}
-.notif-btn:hover{background:rgba(255,255,255,.3)}
-.notif-btn.active{background:#10b981;border-color:#10b981}
+.logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:16px;flex-shrink:0}
+.logo span{font-size:22px}
+.header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 
-/* Online badge no header */
+/* Online badge */
 .online-badge{
   background:rgba(16,185,129,.25);border:1.5px solid rgba(16,185,129,.5);
   color:#fff;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;
-  display:flex;align-items:center;gap:5px;cursor:pointer;transition:.2s;
+  display:flex;align-items:center;gap:5px;cursor:pointer;transition:.2s;white-space:nowrap;
 }
 .online-badge:hover{background:rgba(16,185,129,.4)}
 .online-dot{width:8px;height:8px;border-radius:50%;background:#10b981;
   box-shadow:0 0 0 2px rgba(16,185,129,.4);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 
-/* Botão compartilhar */
-.share-btn{
-  background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.3);
+/* Botão WhatsApp */
+.whatsapp-btn{
+  background:#25d366;color:#fff;border:none;
   border-radius:10px;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;
-  transition:.2s;display:flex;align-items:center;gap:6px;
+  transition:.2s;display:flex;align-items:center;gap:6px;white-space:nowrap;
 }
-.share-btn:hover{background:rgba(255,255,255,.35)}
+.whatsapp-btn:hover{background:#1ebe5d;transform:translateY(-1px)}
 
 /* ── TOASTS ── */
-#toasts{position:fixed;top:76px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:10px;max-width:340px}
+#toasts{position:fixed;top:76px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:10px;max-width:320px}
 .toast{
-  background:#fff;border-radius:14px;padding:14px 18px;
-  box-shadow:0 8px 32px rgba(0,0,0,.15);
-  border-left:4px solid var(--p);
+  background:#fff;border-radius:14px;padding:13px 16px;
+  box-shadow:0 8px 32px rgba(0,0,0,.15);border-left:4px solid var(--p);
   animation:slideIn .35s cubic-bezier(.34,1.56,.64,1);
 }
-.toast.success{border-color:var(--g)}
-.toast.warning{border-color:var(--y)}
-.toast-title{font-weight:800;font-size:14px;margin-bottom:3px}
-.toast-body{font-size:13px;color:var(--t6)}
+.toast.success{border-color:var(--g)}.toast.warning{border-color:var(--y)}
+.toast-title{font-weight:800;font-size:13px;margin-bottom:2px}
+.toast-body{font-size:12px;color:var(--t6)}
 @keyframes slideIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
-@keyframes slideOut{from{transform:translateX(0);opacity:1}to{transform:translateX(110%);opacity:0}}
+@keyframes slideOut{from{opacity:1}to{transform:translateX(110%);opacity:0}}
 
-/* ── MODAL ONLINE / COMPARTILHAR ── */
+/* ── MODAIS ── */
 .overlay{
   position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;
   display:flex;align-items:center;justify-content:center;padding:16px;
-  animation:fadeOverlay .2s ease;
+  animation:fadeIn .2s ease;
 }
-@keyframes fadeOverlay{from{opacity:0}to{opacity:1}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .modal{
-  background:#fff;border-radius:20px;padding:28px;max-width:440px;width:100%;
+  background:#fff;border-radius:20px;padding:26px;max-width:460px;width:100%;
   box-shadow:0 24px 64px rgba(0,0,0,.2);animation:popIn .3s cubic-bezier(.34,1.56,.64,1);
+  max-height:90vh;overflow-y:auto;
 }
 @keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
-.modal h2{font-size:20px;font-weight:900;margin-bottom:4px}
-.modal .modal-sub{font-size:13px;color:var(--s4);margin-bottom:20px}
-.modal label{display:block;font-size:12px;font-weight:700;color:var(--s4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;margin-top:14px}
+.modal h2{font-size:19px;font-weight:900;margin-bottom:4px}
+.modal .sub{font-size:13px;color:var(--s4);margin-bottom:18px}
+.modal label{display:block;font-size:11px;font-weight:800;color:var(--s4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;margin-top:14px}
 .modal input,.modal select{
-  width:100%;border:2px solid var(--s2);border-radius:10px;padding:10px 14px;
-  font-size:14px;outline:none;transition:.2s;font-family:inherit;
+  width:100%;border:2px solid var(--s2);border-radius:10px;padding:9px 13px;
+  font-size:14px;outline:none;transition:.2s;font-family:inherit;background:#fff;
 }
 .modal input:focus,.modal select:focus{border-color:var(--p)}
-.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
 
-/* Painel online no modal */
-.online-list{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto}
+/* Online modal list */
+.online-list{display:flex;flex-direction:column;gap:8px}
 .online-item{
   display:flex;align-items:center;gap:10px;
-  background:var(--s1);border-radius:12px;padding:10px 14px;
-  border:1.5px solid var(--s2);
+  background:var(--s1);border-radius:12px;padding:10px 14px;border:1.5px solid var(--s2);
 }
-.online-item-icon{font-size:20px}
 .online-item-info{flex:1}
 .online-item-name{font-weight:700;font-size:14px}
 .online-item-time{font-size:11px;color:var(--s4)}
-.online-status{width:10px;height:10px;border-radius:50%;background:#10b981;flex-shrink:0}
-
-/* Caixa de link compartilhável */
-.share-box{
-  display:flex;gap:8px;margin-top:8px;
-}
-.share-box input{
-  flex:1;background:var(--s1);border:2px solid var(--s2);border-radius:10px;
-  padding:10px 14px;font-size:13px;color:var(--t9);outline:none;
-}
-.copy-btn{
-  background:var(--p);color:#fff;border:none;border-radius:10px;
-  padding:10px 16px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;
-  transition:.2s;
-}
-.copy-btn:hover{background:var(--pd)}
-.copy-btn.copied{background:var(--g)}
-
-/* Botões de share social */
-.share-socials{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-.social-btn{
-  flex:1;min-width:100px;padding:9px 12px;border:none;border-radius:10px;
-  font-size:13px;font-weight:700;cursor:pointer;transition:.2s;color:#fff;
-  display:flex;align-items:center;justify-content:center;gap:6px;
-}
-.social-btn.whatsapp{background:#25d366}
-.social-btn.whatsapp:hover{background:#1ebe5d}
-.social-btn.telegram{background:#229ed9}
-.social-btn.telegram:hover{background:#1a8fc4}
-.social-btn.copy-link{background:var(--t6)}
-.social-btn.copy-link:hover{background:var(--t9)}
+.online-status-dot{width:10px;height:10px;border-radius:50%;background:#10b981;flex-shrink:0}
 
 /* ── LAYOUT ── */
-.layout{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 64px)}
+.layout{display:grid;grid-template-columns:270px 1fr;min-height:calc(100vh - 64px)}
 @media(max-width:768px){.layout{grid-template-columns:1fr}}
 
 /* ── SIDEBAR ── */
-.sidebar{
-  background:#fff;border-right:2px solid var(--s2);
-  padding:20px;display:flex;flex-direction:column;gap:16px;
-}
+.sidebar{background:#fff;border-right:2px solid var(--s2);padding:18px;display:flex;flex-direction:column;gap:14px}
 .sidebar-title{font-size:11px;font-weight:800;color:var(--s4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
 
 /* Stats */
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stat{background:var(--s1);border-radius:12px;padding:14px;text-align:center;cursor:default}
-.stat.clickable{cursor:pointer;transition:.2s}
-.stat.clickable:hover{background:var(--s2);transform:translateY(-1px)}
-.stat-val{font-size:24px;font-weight:900;color:var(--p)}
-.stat-val.green{color:var(--g)}
-.stat-val.teal{color:#14b8a6}
-.stat-label{font-size:11px;color:var(--s4);margin-top:2px;font-weight:600}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{background:var(--s1);border-radius:12px;padding:12px;text-align:center}
+.stat.clickable{cursor:pointer;transition:.2s}.stat.clickable:hover{background:var(--s2)}
+.stat-val{font-size:22px;font-weight:900;color:var(--p)}
+.stat-val.green{color:var(--g)}.stat-val.teal{color:#14b8a6}
+.stat-label{font-size:10px;color:var(--s4);margin-top:2px;font-weight:700;text-transform:uppercase}
 
 /* Progress ring */
-.progress-wrap{text-align:center;padding:8px 0}
+.progress-wrap{text-align:center;padding:4px 0}
 .progress-ring{position:relative;display:inline-block}
 .progress-ring svg{transform:rotate(-90deg)}
 .ring-bg{fill:none;stroke:var(--s2);stroke-width:8}
 .ring-fg{fill:none;stroke:var(--p);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .6s ease}
 .ring-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
-.ring-pct{font-size:22px;font-weight:900;color:var(--p)}
+.ring-pct{font-size:20px;font-weight:900;color:var(--p)}
 .ring-sub{font-size:10px;color:var(--s4);font-weight:700}
 
-/* Painel online na sidebar */
-.online-panel{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:12px;padding:12px}
-.online-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.online-panel-title{font-size:11px;font-weight:800;color:#166534;text-transform:uppercase;letter-spacing:1px}
+/* Online panel sidebar */
+.online-panel{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:12px;padding:10px}
+.online-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.online-panel-title{font-size:10px;font-weight:800;color:#166534;text-transform:uppercase;letter-spacing:1px}
 .online-count-badge{background:#10b981;color:#fff;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:800}
-.online-mini-list{display:flex;flex-direction:column;gap:4px}
+.online-mini-list{display:flex;flex-direction:column;gap:3px}
 .online-mini-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#166534;font-weight:600}
 .online-mini-dot{width:6px;height:6px;border-radius:50%;background:#10b981;flex-shrink:0}
-
-/* Notifications panel */
-.notif-panel{background:var(--s1);border-radius:12px;padding:12px;max-height:180px;overflow-y:auto}
-.notif-item{padding:8px 0;border-bottom:1px solid var(--s2);font-size:12px;color:var(--t6)}
-.notif-item:last-child{border-bottom:none}
-.notif-item strong{display:block;color:var(--t9);font-size:13px;margin-bottom:2px}
-.notif-time{color:var(--s4);font-size:11px}
-.empty-notif{text-align:center;color:var(--s4);padding:16px;font-size:13px}
 
 /* Add member */
 .add-member-form{display:flex;gap:8px}
 .add-member-form input{flex:1;border:2px solid var(--s2);border-radius:10px;padding:8px 12px;font-size:13px;outline:none;transition:.2s}
 .add-member-form input:focus{border-color:var(--p)}
-.btn-sm{background:var(--p);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;transition:.2s;white-space:nowrap}
-.btn-sm:hover{background:var(--pd)}
-.btn-sm.outline{background:transparent;color:var(--p);border:2px solid var(--p)}
-.btn-sm.outline:hover{background:var(--p);color:#fff}
-.btn-sm.green{background:var(--g)}
-.btn-sm.green:hover{background:#059669}
+
+/* Buttons */
+.btn{background:var(--p);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;transition:.2s;white-space:nowrap}
+.btn:hover{background:var(--pd)}.btn.green{background:var(--g)}.btn.green:hover{background:#059669}
+.btn.red{background:var(--r)}.btn.red:hover{background:#dc2626}
+.btn.outline{background:transparent;color:var(--p);border:2px solid var(--p)}.btn.outline:hover{background:var(--p);color:#fff}
+.btn.sm{padding:6px 12px;font-size:12px}
+
+/* Notif panel */
+.notif-panel{background:var(--s1);border-radius:12px;padding:10px;max-height:160px;overflow-y:auto}
+.notif-item{padding:7px 0;border-bottom:1px solid var(--s2);font-size:12px;color:var(--t6)}
+.notif-item:last-child{border-bottom:none}
+.notif-item strong{display:block;color:var(--t9);font-size:12px;margin-bottom:1px}
+.notif-time{color:var(--s4);font-size:10px}
+.empty-notif{text-align:center;color:var(--s4);padding:14px;font-size:12px}
 
 /* ── MAIN ── */
-main{padding:24px;display:flex;flex-direction:column;gap:24px}
+main{padding:20px;display:flex;flex-direction:column;gap:20px}
 
 /* Add task bar */
 .add-task-bar{
-  background:#fff;border-radius:16px;padding:18px 22px;
+  background:#fff;border-radius:16px;padding:16px 20px;
   border:2px solid var(--s2);display:flex;flex-wrap:wrap;gap:10px;align-items:center;
   box-shadow:0 2px 12px rgba(0,0,0,.04);
 }
 .add-task-bar input,.add-task-bar select{
-  border:2px solid var(--s2);border-radius:10px;padding:10px 14px;font-size:14px;
+  border:2px solid var(--s2);border-radius:10px;padding:9px 13px;font-size:13px;
   outline:none;transition:.2s;background:#fff;
 }
-.add-task-bar input{flex:1;min-width:160px}
+.add-task-bar input{flex:1;min-width:140px}
 .add-task-bar input:focus,.add-task-bar select:focus{border-color:var(--p)}
 .btn-add{
   background:linear-gradient(135deg,var(--p),var(--pd));
-  color:#fff;border:none;border-radius:10px;padding:10px 22px;
-  font-size:14px;font-weight:800;cursor:pointer;transition:.2s;
+  color:#fff;border:none;border-radius:10px;padding:9px 20px;
+  font-size:13px;font-weight:800;cursor:pointer;transition:.2s;
   box-shadow:0 4px 12px rgba(99,102,241,.3);
 }
 .btn-add:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(99,102,241,.4)}
 
 /* Members grid */
-.members-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.members-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
 
 /* Member card */
-.member-card{
-  background:#fff;border-radius:18px;padding:22px;
-  border:2px solid var(--s2);transition:.25s;
-  box-shadow:0 2px 12px rgba(0,0,0,.04);
-}
-.member-card.completed{border-color:var(--g);background:linear-gradient(135deg,#fff,#f0fdf4)}
+.member-card{background:#fff;border-radius:18px;padding:20px;border:2px solid var(--s2);transition:.25s;box-shadow:0 2px 12px rgba(0,0,0,.04)}
 .member-card:hover{box-shadow:0 8px 28px rgba(0,0,0,.1);transform:translateY(-2px)}
-.member-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.avatar{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;color:#fff;flex-shrink:0}
+.member-card.all-done{border-color:var(--g);background:linear-gradient(135deg,#fff,#f0fdf4)}
+
+/* Member header */
+.member-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.avatar{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;flex-shrink:0;font-weight:900}
 .member-info{flex:1}
-.member-name{font-weight:800;font-size:16px}
-.member-sub{font-size:12px;color:var(--s4);margin-top:1px}
-.member-pct{font-weight:900;font-size:18px}
-.mini-bar{background:var(--s2);border-radius:999px;height:6px;margin-bottom:16px;overflow:hidden}
+.member-name{font-weight:800;font-size:15px}
+.member-sub{font-size:11px;color:var(--s4);margin-top:1px}
+.member-del-btn{background:none;border:none;cursor:pointer;color:var(--s4);font-size:20px;line-height:1;transition:.2s;padding:2px 4px;border-radius:6px}
+.member-del-btn:hover{color:var(--r);background:#fee2e2}
+
+/* Tabs dentro do card */
+.card-tabs{display:flex;gap:4px;margin-bottom:12px;background:var(--s1);border-radius:10px;padding:3px}
+.card-tab{flex:1;border:none;background:transparent;border-radius:8px;padding:6px 4px;font-size:11px;font-weight:700;cursor:pointer;color:var(--s4);transition:.2s}
+.card-tab.active{background:#fff;color:var(--p);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+
+/* Rotina */
+.rotina-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.rotina-progress{font-size:11px;font-weight:700;color:var(--s4)}
+.rotina-bar{background:var(--s2);border-radius:999px;height:5px;margin-bottom:10px;overflow:hidden}
+.rotina-fill{height:100%;border-radius:999px;background:var(--g);transition:.5s ease}
+.rotina-list{display:flex;flex-direction:column;gap:6px}
+.rotina-item{
+  display:flex;align-items:center;gap:10px;
+  background:var(--s1);border-radius:10px;padding:9px 12px;
+  border:1.5px solid var(--s2);transition:.2s;cursor:pointer;
+}
+.rotina-item:hover{border-color:var(--s3);background:#f8fafc}
+.rotina-item.feito{background:#f0fdf4;border-color:#86efac}
+.rotina-check{
+  width:22px;height:22px;border-radius:7px;border:2px solid var(--s3);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:.2s;background:#fff;font-size:13px;
+}
+.rotina-item.feito .rotina-check{background:var(--g);border-color:var(--g);color:#fff}
+.rotina-titulo{flex:1;font-size:13px;font-weight:600;color:var(--t9)}
+.rotina-item.feito .rotina-titulo{text-decoration:line-through;color:var(--s4)}
+.reset-btn{font-size:11px;font-weight:700;color:var(--s4);cursor:pointer;background:none;border:none;padding:2px 6px;border-radius:6px;transition:.2s}
+.reset-btn:hover{background:var(--s2);color:var(--t9)}
+
+/* Task list */
+.mini-bar{background:var(--s2);border-radius:999px;height:5px;margin-bottom:12px;overflow:hidden}
 .mini-fill{height:100%;border-radius:999px;background:var(--p);transition:.5s ease}
 .mini-fill.done{background:var(--g)}
-.task-list{display:flex;flex-direction:column;gap:8px}
-.task-item{display:flex;align-items:center;gap:10px;background:var(--s1);border-radius:12px;padding:10px 12px;border:1.5px solid var(--s2);transition:.2s}
+.task-list{display:flex;flex-direction:column;gap:7px}
+.task-item{display:flex;align-items:center;gap:9px;background:var(--s1);border-radius:10px;padding:9px 11px;border:1.5px solid var(--s2);transition:.2s}
 .task-item:hover{border-color:var(--s3)}
 .task-item.done-item{background:#f0fdf4;border-color:#bbf7d0;opacity:.8}
-.task-check{width:22px;height:22px;border-radius:7px;border:2px solid var(--s3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s;background:#fff}
+.task-check{width:20px;height:20px;border-radius:6px;border:2px solid var(--s3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s;background:#fff;font-size:12px}
 .task-check.checked{background:var(--g);border-color:var(--g);color:#fff}
 .task-check:hover:not(.checked){border-color:var(--p);background:#eef2ff}
-.task-title{flex:1;font-size:13px;font-weight:600;color:var(--t9)}
-.task-title.striked{text-decoration:line-through;color:var(--s4)}
-.priority{padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;flex-shrink:0}
-.p-alta{background:#fee2e2;color:#991b1b}
-.p-media{background:#fef9c3;color:#854d0e}
-.p-baixa{background:#dcfce7;color:#166534}
-.task-del{background:none;border:none;cursor:pointer;color:var(--s4);font-size:18px;padding:0 2px;line-height:1;transition:.2s;flex-shrink:0}
+.task-title-txt{flex:1;font-size:12px;font-weight:600;color:var(--t9)}
+.task-title-txt.striked{text-decoration:line-through;color:var(--s4)}
+.priority{padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;flex-shrink:0}
+.p-alta{background:#fee2e2;color:#991b1b}.p-media{background:#fef9c3;color:#854d0e}.p-baixa{background:#dcfce7;color:#166534}
+.task-del{background:none;border:none;cursor:pointer;color:var(--s4);font-size:17px;padding:0 2px;line-height:1;transition:.2s;flex-shrink:0}
 .task-del:hover{color:var(--r)}
-.empty{text-align:center;color:var(--s4);font-size:13px;padding:20px 0}
+.empty{text-align:center;color:var(--s4);font-size:12px;padding:16px 0}
 
 /* Scrollbar */
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
 
 /* Responsive */
 @media(max-width:768px){
   .sidebar{display:none}
-  main{padding:16px}
-  .add-task-bar{padding:14px}
+  main{padding:14px}
   .members-grid{grid-template-columns:1fr}
-  .header-actions{gap:6px}
-  .share-btn span,.notif-btn span{display:none}
+  .logo{font-size:13px}
 }
 </style>
 </head>
@@ -271,20 +252,14 @@ main{padding:24px;display:flex;flex-direction:column;gap:24px}
 
 <!-- HEADER -->
 <header>
-  <div class="logo"><span>📋</span> TaskManager</div>
+  <div class="logo"><span>✅</span> Carlos te obriga a fazer</div>
   <div class="header-actions">
-    <!-- Online badge -->
-    <div class="online-badge" onclick="openOnlineModal()" title="Ver quem está online">
+    <div class="online-badge" onclick="openModal('modalOnline')" title="Ver quem está online">
       <span class="online-dot"></span>
       <span id="onlineCount">0 online</span>
     </div>
-    <!-- Compartilhar -->
-    <button class="share-btn" onclick="openShareModal()">
-      🔗 <span>Compartilhar</span>
-    </button>
-    <!-- Notificações -->
-    <button class="notif-btn" id="notifBtn" onclick="toggleNotifications()">
-      🔔 <span>Notificações</span>
+    <button class="whatsapp-btn" onclick="abrirWhatsapp()">
+      💬 Falar com Carlos
     </button>
   </div>
 </header>
@@ -292,42 +267,26 @@ main{padding:24px;display:flex;flex-direction:column;gap:24px}
 <!-- TOASTS -->
 <div id="toasts"></div>
 
-<!-- MODAL: QUEM ESTÁ ONLINE -->
+<!-- MODAL: ONLINE -->
 <div class="overlay" id="modalOnline" style="display:none" onclick="if(event.target===this)closeModal('modalOnline')">
   <div class="modal">
-    <h2>👥 Usuários Online</h2>
-    <p class="modal-sub" id="onlineModalSub">Veja quem está acessando o site agora</p>
+    <h2>👥 Quem está online</h2>
+    <p class="sub" id="onlineModalSub"></p>
     <div class="online-list" id="onlineList"></div>
     <div class="modal-actions">
-      <button class="btn-sm outline" onclick="closeModal('modalOnline')">Fechar</button>
+      <button class="btn outline" onclick="closeModal('modalOnline')">Fechar</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: COMPARTILHAR -->
-<div class="overlay" id="modalShare" style="display:none" onclick="if(event.target===this)closeModal('modalShare')">
+<!-- MODAL: CONFIRMAR REMOÇÃO DE PESSOA -->
+<div class="overlay" id="modalConfirm" style="display:none" onclick="if(event.target===this)closeModal('modalConfirm')">
   <div class="modal">
-    <h2>🔗 Compartilhar Site</h2>
-    <p class="modal-sub">Envie o link para sua equipe acessar em tempo real</p>
-
-    <label>Link do site</label>
-    <div class="share-box">
-      <input type="text" id="shareUrl" readonly>
-      <button class="copy-btn" id="copyBtn" onclick="copyLink()">Copiar</button>
-    </div>
-
-    <label>Compartilhar via</label>
-    <div class="share-socials">
-      <button class="social-btn whatsapp" onclick="shareWhatsApp()">
-        💬 WhatsApp
-      </button>
-      <button class="social-btn telegram" onclick="shareTelegram()">
-        ✈️ Telegram
-      </button>
-    </div>
-
+    <h2>⚠️ Remover pessoa</h2>
+    <p class="sub" id="confirmText">Tem certeza? Todas as tarefas desta pessoa serão removidas.</p>
     <div class="modal-actions">
-      <button class="btn-sm outline" onclick="closeModal('modalShare')">Fechar</button>
+      <button class="btn outline" onclick="closeModal('modalConfirm')">Cancelar</button>
+      <button class="btn red" id="confirmBtn">Remover</button>
     </div>
   </div>
 </div>
@@ -335,7 +294,7 @@ main{padding:24px;display:flex;flex-direction:column;gap:24px}
 <!-- MODAL: NOVA TAREFA -->
 <div class="overlay" id="modalTask" style="display:none" onclick="if(event.target===this)closeModal('modalTask')">
   <div class="modal">
-    <h2>Nova Tarefa</h2>
+    <h2>➕ Nova Tarefa</h2>
     <label>Título</label>
     <input id="mTitle" type="text" placeholder="Descrição da tarefa...">
     <label>Responsável</label>
@@ -347,8 +306,8 @@ main{padding:24px;display:flex;flex-direction:column;gap:24px}
       <option value="baixa">🟢 Baixa</option>
     </select>
     <div class="modal-actions">
-      <button class="btn-sm outline" onclick="closeModal('modalTask')">Cancelar</button>
-      <button class="btn-sm" onclick="submitModal()">Salvar</button>
+      <button class="btn outline" onclick="closeModal('modalTask')">Cancelar</button>
+      <button class="btn" onclick="submitModal()">Salvar</button>
     </div>
   </div>
 </div>
@@ -358,12 +317,13 @@ main{padding:24px;display:flex;flex-direction:column;gap:24px}
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
+
     <!-- Progresso -->
     <div>
       <div class="sidebar-title">Progresso geral</div>
       <div class="progress-wrap">
         <div class="progress-ring">
-          <svg width="120" height="120" viewBox="0 0 120 120">
+          <svg width="110" height="110" viewBox="0 0 120 120">
             <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
             <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="52" stroke-dasharray="326.7" stroke-dashoffset="326.7"></circle>
           </svg>
@@ -374,12 +334,12 @@ main{padding:24px;display:flex;flex-direction:column;gap:24px}
         </div>
       </div>
       <div class="stats-grid">
-        <div class="stat"><div class="stat-val" id="sTot">0</div><div class="stat-label">Total</div></div>
+        <div class="stat"><div class="stat-val" id="sTot">0</div><div class="stat-label">Tarefas</div></div>
         <div class="stat"><div class="stat-val green" id="sDone">0</div><div class="stat-label">Concluídas</div></div>
-        <div class="stat"><div class="stat-val" id="sMem">0</div><div class="stat-label">Membros</div></div>
-        <div class="stat clickable" onclick="openOnlineModal()" title="Clique para ver quem está online">
+        <div class="stat"><div class="stat-val" id="sMem">0</div><div class="stat-label">Pessoas</div></div>
+        <div class="stat clickable" onclick="openModal('modalOnline')">
           <div class="stat-val teal" id="sOnline">0</div>
-          <div class="stat-label">Online agora</div>
+          <div class="stat-label">Online</div>
         </div>
       </div>
     </div>
@@ -393,34 +353,38 @@ main{padding:24px;display:flex;flex-direction:column;gap:24px}
           <span class="online-count-badge" id="sideOnlineCount">0</span>
         </div>
         <div class="online-mini-list" id="sideOnlineList">
-          <div style="font-size:12px;color:#166534;opacity:.6">Ninguém online ainda</div>
+          <div style="font-size:11px;color:#166534;opacity:.6">Ninguém online ainda</div>
         </div>
       </div>
     </div>
 
-    <!-- Adicionar membro -->
+    <!-- Adicionar pessoa -->
     <div>
-      <div class="sidebar-title">Adicionar membro</div>
+      <div class="sidebar-title">Adicionar pessoa</div>
       <div class="add-member-form">
-        <input id="newMemberName" type="text" placeholder="Nome do membro..." maxlength="30" onkeydown="if(event.key==='Enter')addMember()">
-        <button class="btn-sm" onclick="addMember()">+</button>
+        <input id="newMemberName" type="text" placeholder="Nome da pessoa..." maxlength="30" onkeydown="if(event.key==='Enter')addMember()">
+        <button class="btn" onclick="addMember()">+</button>
       </div>
     </div>
 
-    <!-- Notificações recentes -->
-    <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;gap:8px">
+    <!-- Notificações -->
+    <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;gap:6px">
       <div class="sidebar-title">Notificações recentes</div>
       <div class="notif-panel" id="notifPanel">
-        <div class="empty-notif">Nenhuma notificação ainda</div>
+        <div class="empty-notif">Nenhuma ainda</div>
       </div>
     </div>
 
-    <button class="btn-sm green" onclick="openShareModal()" style="width:100%">🔗 Compartilhar site</button>
-    <button class="btn-sm" onclick="sendTest()" style="width:100%;background:#8b5cf6">📤 Testar notificação</button>
+    <!-- WhatsApp -->
+    <button class="whatsapp-btn" style="width:100%;justify-content:center" onclick="abrirWhatsapp()">
+      💬 Falar com Carlos (11) 99794-7508
+    </button>
+
   </aside>
 
   <!-- MAIN -->
   <main>
+    <!-- Barra de adicionar tarefa -->
     <div class="add-task-bar">
       <input id="quickTitle" type="text" placeholder="Nova tarefa..." maxlength="80" onkeydown="if(event.key==='Enter')quickAdd()">
       <select id="quickMember"></select>
@@ -431,6 +395,8 @@ main{padding:24px;display:flex;flex-direction:column;gap:24px}
       </select>
       <button class="btn-add" onclick="quickAdd()">+ Adicionar Tarefa</button>
     </div>
+
+    <!-- Cards das pessoas -->
     <div class="members-grid" id="membersGrid">
       <div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:40px">Carregando...</div>
     </div>
@@ -438,79 +404,36 @@ main{padding:24px;display:flex;flex-direction:column;gap:24px}
 </div>
 
 <script>
-// ── CONFIG ──────────────────────────────────────────────────
-const API = window.location.hostname === 'localhost'
-  ? 'http://localhost:3001'
-  : window.location.origin;
+// ── CONFIG ────────────────────────────────────────────────────
+const API    = window.location.hostname === 'localhost' ? 'http://localhost:3001' : window.location.origin;
 const WS_URL = API.replace(/^http/, 'ws') + '/ws';
+const WHATSAPP_NUMBER = '5511997947508';
 
-// ── STATE ───────────────────────────────────────────────────
+// ── STATE ─────────────────────────────────────────────────────
 let state = { members: [], stats: {}, notifications: [], onlineUsers: [] };
-let pushSub = null;
 let ws = null;
 
-// ── WEBSOCKET ───────────────────────────────────────────────
+// ── WEBSOCKET ─────────────────────────────────────────────────
 function connectWS() {
   ws = new WebSocket(WS_URL);
   ws.onmessage = e => {
     const { event, data } = JSON.parse(e.data);
-    if (event === 'init' || event === 'state') {
-      state = data;
-      render();
-    }
-    if (event === 'notification') {
-      showToast(data.title, data.body, 'success');
-    }
+    if (event === 'init' || event === 'state') { state = data; render(); }
   };
   ws.onclose = () => setTimeout(connectWS, 3000);
   ws.onerror = () => {};
 }
 
-// ── FETCH ────────────────────────────────────────────────────
+// ── FETCH ─────────────────────────────────────────────────────
 async function api(path, opts = {}) {
-  const r = await fetch(`${API}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
-    ...opts,
-  });
+  const r = await fetch(`${API}${path}`, { headers: { 'Content-Type': 'application/json' }, ...opts });
   return r.json();
 }
 
-// ── NOTIFICAÇÕES ─────────────────────────────────────────────
-async function toggleNotifications() {
-  if (pushSub) {
-    await api('/api/push/unsubscribe', { method: 'POST', body: JSON.stringify({ endpoint: pushSub.endpoint }) });
-    pushSub = null;
-    document.getElementById('notifBtn').innerHTML = '🔔 <span>Notificações</span>';
-    document.getElementById('notifBtn').classList.remove('active');
-    showToast('Notificações desativadas', '', 'warning');
-    return;
-  }
-  await enablePush();
-}
-
-async function enablePush() {
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    showToast('⚠️ Push não suportado neste browser', '', 'warning'); return;
-  }
-  const perm = await Notification.requestPermission();
-  if (perm !== 'granted') { showToast('Permissão negada', '', 'warning'); return; }
-  try {
-    const reg = await navigator.serviceWorker.ready;
-    const { key } = await api('/api/vapid-public-key');
-    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(key) });
-    pushSub = sub.toJSON();
-    await api('/api/push/subscribe', { method: 'POST', body: JSON.stringify(pushSub) });
-    document.getElementById('notifBtn').innerHTML = '✅ <span>Ativas</span>';
-    document.getElementById('notifBtn').classList.add('active');
-    showToast('✅ Notificações ativadas!', '', 'success');
-  } catch(err) {
-    showToast('Erro: ' + err.message, '', 'warning');
-  }
-}
-
-async function sendTest() {
-  await api('/api/notify/test', { method: 'POST' });
-  showToast('📤 Notificação de teste enviada', '', 'success');
+// ── WHATSAPP ──────────────────────────────────────────────────
+function abrirWhatsapp() {
+  const msg = encodeURIComponent('Olá Carlos! Vi o site e quero falar sobre as tarefas 😊');
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
 }
 
 // ── MEMBROS ───────────────────────────────────────────────────
@@ -522,6 +445,17 @@ async function addMember() {
   input.value = '';
 }
 
+let memberToDelete = null;
+function confirmarRemocao(id, nome) {
+  memberToDelete = id;
+  document.getElementById('confirmText').textContent = `Tem certeza? "${nome}" e todas as suas tarefas serão removidas.`;
+  document.getElementById('confirmBtn').onclick = async () => {
+    await api(`/api/members/${memberToDelete}`, { method: 'DELETE' });
+    closeModal('modalConfirm');
+  };
+  openModal('modalConfirm');
+}
+
 // ── TAREFAS ───────────────────────────────────────────────────
 async function quickAdd() {
   const title      = document.getElementById('quickTitle').value.trim();
@@ -531,13 +465,19 @@ async function quickAdd() {
   await api('/api/tasks', { method: 'POST', body: JSON.stringify({ title, assignedTo, priority }) });
   document.getElementById('quickTitle').value = '';
 }
-
 async function toggleTask(id, current) {
   await api(`/api/tasks/${id}`, { method: 'PATCH', body: JSON.stringify({ done: !current }) });
 }
-
 async function deleteTask(id) {
   await api(`/api/tasks/${id}`, { method: 'DELETE' });
+}
+
+// ── ROTINA ────────────────────────────────────────────────────
+async function toggleRotina(memberId, metaId, feito) {
+  await api(`/api/members/${memberId}/rotina/${metaId}`, { method: 'PATCH', body: JSON.stringify({ feito: !feito }) });
+}
+async function resetRotina(memberId) {
+  await api(`/api/members/${memberId}/rotina/reset`, { method: 'POST' });
 }
 
 // ── RENDER ────────────────────────────────────────────────────
@@ -556,24 +496,20 @@ function renderStats() {
   document.getElementById('sDone').textContent   = s.done    || 0;
   document.getElementById('sMem').textContent    = s.members || 0;
   document.getElementById('sOnline').textContent = s.online  || 0;
-  // Header badge
-  const cnt = s.online || 0;
-  document.getElementById('onlineCount').textContent = `${cnt} online`;
-  // Ring
+  document.getElementById('onlineCount').textContent = `${s.online || 0} online`;
   const circ = 326.7;
   document.getElementById('ringFg').style.strokeDashoffset = circ - (circ * pct / 100);
-  document.getElementById('ringFg').style.stroke  = pct === 100 ? '#10b981' : '#6366f1';
-  document.getElementById('ringPct').textContent  = pct + '%';
-  document.getElementById('ringPct').style.color  = pct === 100 ? '#10b981' : '#6366f1';
+  document.getElementById('ringFg').style.stroke = pct === 100 ? '#10b981' : '#6366f1';
+  document.getElementById('ringPct').textContent = pct + '%';
+  document.getElementById('ringPct').style.color = pct === 100 ? '#10b981' : '#6366f1';
 }
 
 function renderOnline() {
   const users = state.onlineUsers || [];
-  // Sidebar mini list
-  const sideList = document.getElementById('sideOnlineList');
   document.getElementById('sideOnlineCount').textContent = users.length;
+  const sideList = document.getElementById('sideOnlineList');
   if (!users.length) {
-    sideList.innerHTML = '<div style="font-size:12px;color:#166534;opacity:.6">Ninguém online ainda</div>';
+    sideList.innerHTML = '<div style="font-size:11px;color:#166534;opacity:.6">Ninguém online ainda</div>';
   } else {
     sideList.innerHTML = users.map(u => `
       <div class="online-mini-item">
@@ -583,41 +519,87 @@ function renderOnline() {
   }
 }
 
+// Estado de qual aba está ativa por card
+const cardTabs = {};
+
 function renderMembersGrid() {
   const grid = document.getElementById('membersGrid');
   if (!state.members?.length) {
-    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:40px">Nenhum membro. Adicione um membro na barra lateral.</div>';
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#94a3b8;padding:40px;font-size:14px">Nenhuma pessoa ainda.<br>Adicione alguém na barra lateral ➡️</div>';
     return;
   }
   grid.innerHTML = state.members.map(m => {
     const tot  = m.tasks.length;
     const done = m.tasks.filter(t => t.done).length;
     const pct  = tot > 0 ? Math.round((done / tot) * 100) : 0;
+    const tab  = cardTabs[m.id] || 'rotina'; // padrão: aba rotina
+
+    const rotTotal = m.rotinaTotal || 0;
+    const rotFeita = m.rotinaFeita || 0;
+    const rotPct   = rotTotal > 0 ? Math.round((rotFeita / rotTotal) * 100) : 0;
+    const allDone  = m.completedAll && tot > 0 && rotPct === 100;
+
     return `
-    <div class="member-card ${m.completedAll && tot > 0 ? 'completed' : ''}">
+    <div class="member-card ${allDone ? 'all-done' : ''}">
+      <!-- Header do card -->
       <div class="member-header">
         <div class="avatar" style="background:${m.color}">${m.avatar}</div>
         <div class="member-info">
-          <div class="member-name">${m.completedAll && tot > 0 ? '🏆 ' : ''}${esc(m.name)}</div>
-          <div class="member-sub">${done}/${tot} tarefas concluídas</div>
+          <div class="member-name">${allDone ? '🏆 ' : ''}${esc(m.name)}</div>
+          <div class="member-sub">Rotina: ${rotFeita}/${rotTotal} · Tarefas: ${done}/${tot}</div>
         </div>
-        <div class="member-pct" style="color:${pct===100?'#10b981':'#6366f1'}">${pct}%</div>
+        <button class="member-del-btn" onclick="confirmarRemocao('${m.id}','${esc(m.name)}')" title="Remover pessoa">🗑️</button>
       </div>
-      <div class="mini-bar"><div class="mini-fill ${pct===100?'done':''}" style="width:${pct}%"></div></div>
-      <div class="task-list">
-        ${tot === 0
-          ? '<div class="empty">Sem tarefas atribuídas</div>'
-          : m.tasks.map(t => `
-            <div class="task-item ${t.done?'done-item':''}">
-              <div class="task-check ${t.done?'checked':''}" onclick="toggleTask('${t.id}',${t.done})">${t.done?'✓':''}</div>
-              <span class="task-title ${t.done?'striked':''}">${esc(t.title)}</span>
-              <span class="priority p-${t.priority}">${t.priority}</span>
-              <button class="task-del" onclick="deleteTask('${t.id}')">×</button>
-            </div>`).join('')
-        }
+
+      <!-- Abas -->
+      <div class="card-tabs">
+        <button class="card-tab ${tab==='rotina'?'active':''}" onclick="setTab('${m.id}','rotina')">🌅 Rotina Diária</button>
+        <button class="card-tab ${tab==='tarefas'?'active':''}" onclick="setTab('${m.id}','tarefas')">📋 Tarefas</button>
       </div>
+
+      <!-- ABA ROTINA -->
+      ${tab === 'rotina' ? `
+        <div>
+          <div class="rotina-header">
+            <span class="rotina-progress">${rotFeita}/${rotTotal} concluídas · ${rotPct}%</span>
+            <button class="reset-btn" onclick="resetRotina('${m.id}')">↺ Resetar</button>
+          </div>
+          <div class="rotina-bar"><div class="rotina-fill" style="width:${rotPct}%"></div></div>
+          <div class="rotina-list">
+            ${(m.rotina||[]).map(r => `
+              <div class="rotina-item ${r.feito?'feito':''}" onclick="toggleRotina('${m.id}','${r.id}',${r.feito})">
+                <div class="rotina-check">${r.feito ? '✓' : ''}</div>
+                <span class="rotina-titulo">${esc(r.titulo)}</span>
+              </div>`).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- ABA TAREFAS -->
+      ${tab === 'tarefas' ? `
+        <div>
+          <div class="mini-bar"><div class="mini-fill ${pct===100?'done':''}" style="width:${pct}%"></div></div>
+          <div class="task-list">
+            ${tot === 0
+              ? '<div class="empty">Sem tarefas. Use a barra acima para adicionar.</div>'
+              : m.tasks.map(t => `
+                <div class="task-item ${t.done?'done-item':''}">
+                  <div class="task-check ${t.done?'checked':''}" onclick="toggleTask('${t.id}',${t.done})">${t.done?'✓':''}</div>
+                  <span class="task-title-txt ${t.done?'striked':''}">${esc(t.title)}</span>
+                  <span class="priority p-${t.priority}">${t.priority}</span>
+                  <button class="task-del" onclick="deleteTask('${t.id}')">×</button>
+                </div>`).join('')
+            }
+          </div>
+        </div>
+      ` : ''}
     </div>`;
   }).join('');
+}
+
+function setTab(memberId, tab) {
+  cardTabs[memberId] = tab;
+  renderMembersGrid();
 }
 
 function renderMemberSelects() {
@@ -631,7 +613,7 @@ function renderMemberSelects() {
 function renderNotifPanel() {
   const panel = document.getElementById('notifPanel');
   const notes = state.notifications || [];
-  if (!notes.length) { panel.innerHTML = '<div class="empty-notif">Nenhuma notificação ainda</div>'; return; }
+  if (!notes.length) { panel.innerHTML = '<div class="empty-notif">Nenhuma ainda</div>'; return; }
   panel.innerHTML = notes.map(n => `
     <div class="notif-item">
       <strong>${esc(n.title)}</strong>
@@ -644,55 +626,29 @@ function renderNotifPanel() {
 function openModal(id) { document.getElementById(id).style.display = 'flex'; }
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-function openOnlineModal() {
-  const users = state.onlineUsers || [];
-  const sub = document.getElementById('onlineModalSub');
-  sub.textContent = `${users.length} pessoa(s) acessando agora`;
-  const list = document.getElementById('onlineList');
-  if (!users.length) {
-    list.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:20px;font-size:13px">Nenhum usuário online no momento</div>';
-  } else {
-    list.innerHTML = users.map((u, i) => `
-      <div class="online-item">
-        <span class="online-item-icon">${u.device.split(' ')[0]}</span>
-        <div class="online-item-info">
-          <div class="online-item-name">${u.device} · ${u.browser}</div>
-          <div class="online-item-time">Online há ${timeAgo(u.joinedAt)}</div>
-        </div>
-        <span class="online-status"></span>
-      </div>`).join('');
+// Abrir modal online com detalhes
+document.getElementById('modalOnline').addEventListener('click', function(e) {
+  if (e.target === this) closeModal('modalOnline');
+});
+function openModal(id) {
+  if (id === 'modalOnline') {
+    const users = state.onlineUsers || [];
+    document.getElementById('onlineModalSub').textContent = `${users.length} pessoa(s) acessando agora`;
+    document.getElementById('onlineList').innerHTML = users.length
+      ? users.map(u => `
+          <div class="online-item">
+            <div class="online-item-info">
+              <div class="online-item-name">${u.device} · ${u.browser}</div>
+              <div class="online-item-time">Online há ${timeAgo(u.joinedAt)}</div>
+            </div>
+            <span class="online-status-dot"></span>
+          </div>`).join('')
+      : '<div style="text-align:center;color:#94a3b8;padding:20px;font-size:13px">Nenhum usuário online agora</div>';
   }
-  openModal('modalOnline');
+  document.getElementById(id).style.display = 'flex';
 }
 
-function openShareModal() {
-  document.getElementById('shareUrl').value = window.location.href;
-  openModal('modalShare');
-}
-
-function copyLink() {
-  const url = document.getElementById('shareUrl').value;
-  navigator.clipboard.writeText(url).then(() => {
-    const btn = document.getElementById('copyBtn');
-    btn.textContent = '✅ Copiado!';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
-  });
-}
-
-function shareWhatsApp() {
-  const url = encodeURIComponent(window.location.href);
-  const txt = encodeURIComponent('Acesse nosso TaskManager em tempo real: ');
-  window.open(`https://wa.me/?text=${txt}${url}`, '_blank');
-}
-
-function shareTelegram() {
-  const url = encodeURIComponent(window.location.href);
-  const txt = encodeURIComponent('TaskManager — Gestão de Equipe em tempo real');
-  window.open(`https://t.me/share/url?url=${url}&text=${txt}`, '_blank');
-}
-
-// ── MODAL TAREFA ──────────────────────────────────────────────
+// Modal tarefa
 async function submitModal() {
   const title      = document.getElementById('mTitle').value.trim();
   const assignedTo = document.getElementById('mMember').value;
@@ -705,39 +661,29 @@ async function submitModal() {
 
 // ── TOAST ─────────────────────────────────────────────────────
 function showToast(title, body, type = 'info') {
-  const container = document.getElementById('toasts');
-  const div = document.createElement('div');
-  div.className = `toast ${type}`;
-  div.innerHTML = `<div class="toast-title">${esc(title)}</div>${body ? `<div class="toast-body">${esc(body)}</div>` : ''}`;
-  container.prepend(div);
-  setTimeout(() => { div.style.animation = 'slideOut .3s ease forwards'; setTimeout(() => div.remove(), 300); }, 4000);
+  const c = document.getElementById('toasts');
+  const d = document.createElement('div');
+  d.className = `toast ${type}`;
+  d.innerHTML = `<div class="toast-title">${esc(title)}</div>${body ? `<div class="toast-body">${esc(body)}</div>` : ''}`;
+  c.prepend(d);
+  setTimeout(() => { d.style.animation = 'slideOut .3s ease forwards'; setTimeout(() => d.remove(), 300); }, 4000);
 }
 
 // ── UTILS ─────────────────────────────────────────────────────
 function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 function timeAgo(ts) {
   const d = Date.now() - ts;
-  if (d < 5000)    return 'agora';
-  if (d < 60000)   return `${Math.floor(d/1000)}s atrás`;
-  if (d < 3600000) return `${Math.floor(d/60000)}min atrás`;
-  if (d < 86400000)return `${Math.floor(d/3600000)}h atrás`;
+  if (d < 5000)     return 'agora';
+  if (d < 60000)    return `${Math.floor(d/1000)}s atrás`;
+  if (d < 3600000)  return `${Math.floor(d/60000)}min atrás`;
+  if (d < 86400000) return `${Math.floor(d/3600000)}h atrás`;
   return `${Math.floor(d/86400000)}d atrás`;
-}
-function urlBase64ToUint8Array(b64) {
-  const pad = b64 + '='.repeat((4 - b64.length % 4) % 4);
-  const raw = atob(pad.replace(/-/g,'+').replace(/_/g,'/'));
-  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
 }
 
 // ── INIT ──────────────────────────────────────────────────────
 (async () => {
   connectWS();
-  try {
-    state = await api('/api/state');
-    render();
-  } catch {
-    setTimeout(connectWS, 1000);
-  }
+  try { state = await api('/api/state'); render(); } catch { setTimeout(connectWS, 1000); }
 })();
 </script>
 </body>
