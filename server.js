@@ -24,6 +24,34 @@ let db = {
   pushSubscriptions: [],
 };
 
+// ── USUÁRIOS ONLINE (WebSocket connections) ──────────────────
+// Cada client WS recebe um id único e info do dispositivo
+const onlineClients = new Map(); // ws -> { id, ua, joinedAt }
+
+function getOnlineUsers() {
+  return Array.from(onlineClients.values()).map(c => ({
+    id:       c.id,
+    device:   c.device,
+    browser:  c.browser,
+    joinedAt: c.joinedAt,
+  }));
+}
+
+function parseDevice(ua = '') {
+  if (/Mobile|Android|iPhone/i.test(ua)) return '📱 Mobile';
+  if (/iPad|Tablet/i.test(ua))           return '📟 Tablet';
+  return '🖥️ Desktop';
+}
+
+function parseBrowser(ua = '') {
+  if (/Edg\//i.test(ua))     return 'Edge';
+  if (/Chrome/i.test(ua))    return 'Chrome';
+  if (/Firefox/i.test(ua))   return 'Firefox';
+  if (/Safari/i.test(ua))    return 'Safari';
+  if (/OPR|Opera/i.test(ua)) return 'Opera';
+  return 'Navegador';
+}
+
 // ── HELPERS ─────────────────────────────────────────────────
 function uid() {
   return crypto.randomUUID();
@@ -42,6 +70,7 @@ function buildState() {
 
   const allTasks = db.tasks;
   const totalDone = allTasks.filter(t => t.done).length;
+  const online = getOnlineUsers();
 
   return {
     members,
@@ -50,7 +79,9 @@ function buildState() {
       done:    totalDone,
       members: db.members.length,
       devices: db.pushSubscriptions.length,
+      online:  online.length,
     },
+    onlineUsers: online,
     notifications: db.notifications.slice(-20).reverse(),
   };
 }
@@ -72,8 +103,30 @@ function addNotification(title, body = '') {
 }
 
 // ── WEBSOCKET ────────────────────────────────────────────────
-wss.on('connection', ws => {
+wss.on('connection', (ws, req) => {
+  const ua = req.headers['user-agent'] || '';
+  const clientInfo = {
+    id:       uid(),
+    device:   parseDevice(ua),
+    browser:  parseBrowser(ua),
+    joinedAt: Date.now(),
+  };
+  onlineClients.set(ws, clientInfo);
+
+  // Envia estado inicial
   ws.send(JSON.stringify({ event: 'init', data: buildState() }));
+
+  // Avisa todos que alguém entrou
+  broadcastState();
+
+  ws.on('close', () => {
+    onlineClients.delete(ws);
+    broadcastState();
+  });
+
+  ws.on('error', () => {
+    onlineClients.delete(ws);
+  });
 });
 
 // ── API: ESTADO ──────────────────────────────────────────────
@@ -153,7 +206,7 @@ app.delete('/api/tasks/:id', (req, res) => {
   res.json({ ok: true });
 });
 
-// ── API: VAPID (chave fake para não quebrar o frontend) ──────
+// ── API: VAPID ───────────────────────────────────────────────
 app.get('/api/vapid-public-key', (req, res) => {
   res.json({ key: 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjZJMvEZdRdN4DXHuNDdKYIbWy9A0' });
 });
